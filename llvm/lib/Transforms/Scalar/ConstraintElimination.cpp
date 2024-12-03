@@ -265,7 +265,7 @@ struct State {
   /// precondition checking.
   Value *
   createIndexExpression(APInt ConstantOffset,
-                        const MapVector<Value *, APInt> &VariableOffsets);
+                        const SmallMapVector<Value *, APInt, 4> &VariableOffsets);
 };
 
 class ConstraintInfo;
@@ -1036,7 +1036,7 @@ static void dumpConstraint(ArrayRef<int64_t> C,
 
 Value *
 State::createIndexExpression(APInt ConstantOffset,
-                             const MapVector<Value *, APInt> &VariableOffsets) {
+                             const SmallMapVector<Value *, APInt, 4> &VariableOffsets) {
   unsigned BitWidth = ConstantOffset.getBitWidth();
 
   Type *IntTy = Type::getIntNTy(Ctx, BitWidth);
