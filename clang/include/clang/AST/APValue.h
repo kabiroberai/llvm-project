@@ -419,6 +419,7 @@ private:
   };
   struct MemberPointerData;
 
+  /* TO_UPSTREAM(BoundsSafety) ON */
   struct LVBase {
     APValue::LValueBase Base;
     CharUnits Offset;
@@ -449,11 +450,14 @@ private:
     LVBase Base;
     LValuePathEntry Path[1];
   };
+  /* TO_UPSTREAM(BoundsSafety) OFF */
 
   // We ensure elsewhere that Data is big enough for LV and MemberPointerData.
   typedef llvm::AlignedCharArrayUnion<void *, APSInt, APFloat, ComplexAPSInt,
                                       ComplexAPFloat, Vec, Arr, StructData,
-                                      UnionData, AddrLabelDiffData, LVPlaceHolder> DataType;
+                                      UnionData, AddrLabelDiffData,
+                                      // TO_UPSTREAM(BoundsSafety)
+                                      LVPlaceHolder> DataType;
   static const size_t DataSize = sizeof(DataType);
 
   DataType Data;
