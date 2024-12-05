@@ -1272,11 +1272,13 @@ struct DeclaratorChunk {
   struct LateParsedAttrInfo {
     CachedTokens Toks;
     IdentifierInfo &AttrName;
+    IdentifierInfo *MacroII = nullptr;
     SourceLocation AttrNameLoc;
 
     explicit LateParsedAttrInfo(CachedTokens Toks, IdentifierInfo &AttrName,
+                                IdentifierInfo *MacroII,
                                 SourceLocation AttrNameLoc)
-        : Toks(Toks), AttrName(AttrName), AttrNameLoc(AttrNameLoc) {}
+        : Toks(Toks), AttrName(AttrName), MacroII(MacroII), AttrNameLoc(AttrNameLoc) {}
   };
   /* TO_UPSTREAM(BoundsSafety) OFF */
 

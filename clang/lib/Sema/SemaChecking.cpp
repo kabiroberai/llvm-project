@@ -9491,7 +9491,8 @@ Sema::CheckReturnValExpr(Expr *RetValExp, QualType lhsType,
 
   /* TO_UPSTREAM(BoundsSafety) ON*/
   BoundsSafetyCheckAssignmentToCountAttrPtr(
-      lhsType, RetValExp, Sema::AA_Returning, RetValExp->getBeginLoc());
+      lhsType, RetValExp, AssignmentAction::Returning,
+      RetValExp->getBeginLoc());
 
   // For a count-attributed return type, its dependent count variables can be
   // assigned in arbitrary places. Don't try to find the assigned values, just
@@ -9506,7 +9507,7 @@ Sema::CheckReturnValExpr(Expr *RetValExp, QualType lhsType,
       getLangOpts().hasNewBoundsSafetyCheck(LangOptions::BS_CHK_ReturnSize)) {
     DependentValuesMap DependentValues;
     CheckDynamicCountSizeForAssignment(
-        lhsType, RetValExp->IgnoreParenImpCasts(), Sema::AA_Returning,
+        lhsType, RetValExp->IgnoreParenImpCasts(), AssignmentAction::Returning,
         RetValExp->getBeginLoc(),
         /*Designator=*/"", DependentValues);
   }

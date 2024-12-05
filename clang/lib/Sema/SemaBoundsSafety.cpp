@@ -463,7 +463,7 @@ HasCountedByAttrOnIncompletePointee(QualType Ty, NamedDecl **ND,
 }
 
 bool Sema::BoundsSafetyCheckAssignmentToCountAttrPtrWithIncompletePointeeTy(
-    QualType LHSTy, Expr *RHSExpr, Sema::AssignmentAction Action,
+    QualType LHSTy, Expr *RHSExpr, AssignmentAction Action,
     SourceLocation Loc, std::function<std::string()> ComputeAssignee) {
   NamedDecl *IncompleteTyDecl = nullptr;
   const CountAttributedType *CATy = nullptr;
@@ -476,8 +476,10 @@ bool Sema::BoundsSafetyCheckAssignmentToCountAttrPtrWithIncompletePointeeTy(
   // It's not expected that the diagnostic be emitted in these cases.
   // It's not necessarily a problem but we should catch when this starts
   // to happen.
-  assert(Action != Sema::AA_Converting && Action != Sema::AA_Sending &&
-         Action != Sema::AA_Casting && Action != Sema::AA_Passing_CFAudited);
+  assert(Action != AssignmentAction::Converting &&
+         Action != AssignmentAction::Sending &&
+         Action != AssignmentAction::Casting &&
+         Action != AssignmentAction::Passing_CFAudited);
 
   // By having users provide a function we only pay the cost of allocation the
   // string and computing when a diagnostic is emitted.
@@ -499,7 +501,7 @@ bool Sema::BoundsSafetyCheckAssignmentToCountAttrPtrWithIncompletePointeeTy(
 }
 
 bool Sema::BoundsSafetyCheckAssignmentToCountAttrPtr(
-    QualType LHSTy, Expr *RHSExpr, Sema::AssignmentAction Action,
+    QualType LHSTy, Expr *RHSExpr, AssignmentAction Action,
     SourceLocation Loc, std::function<std::string()> ComputeAssignee) {
   if (!getLangOpts().hasBoundsSafety())
     return true;
@@ -510,7 +512,7 @@ bool Sema::BoundsSafetyCheckAssignmentToCountAttrPtr(
 
 bool Sema::BoundsSafetyCheckInitialization(const InitializedEntity &Entity,
                                            const InitializationKind &Kind,
-                                           Sema::AssignmentAction Action,
+                                           AssignmentAction Action,
                                            QualType LHSType, Expr *RHSExpr) {
   if (!getLangOpts().hasBoundsSafety())
     return true;
@@ -525,7 +527,7 @@ bool Sema::BoundsSafetyCheckInitialization(const InitializedEntity &Entity,
   //
   // We skip Variable initializers because we should have already complained
   // about those variables in `Sema::BoundsSafetyCheckVarDecl()`.
-  if (Action == Sema::AA_Initializing &&
+  if (Action == AssignmentAction::Initializing &&
       Entity.getKind() != InitializedEntity::EK_Variable) {
 
     if (!BoundsSafetyCheckAssignmentToCountAttrPtrWithIncompletePointeeTy(
@@ -641,7 +643,7 @@ bool Sema::BoundsSafetyCheckResolvedCall(FunctionDecl *FDecl, CallExpr *Call,
 
     // Assigning to the parameter type is treated as a "use" of the type.
     if (!BoundsSafetyCheckAssignmentToCountAttrPtr(
-            ParamTy, CallArg, Sema::AA_Passing, CallArg->getBeginLoc(),
+            ParamTy, CallArg, AssignmentAction::Passing, CallArg->getBeginLoc(),
             [&ParamName]() { return ParamName.str(); }))
       ChecksPassed = false;
   }

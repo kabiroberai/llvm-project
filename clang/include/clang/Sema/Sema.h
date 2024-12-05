@@ -2212,7 +2212,7 @@ public:
   bool CheckCountedByAttrOnField(FieldDecl *FD, Expr *E, bool CountInBytes,
                                  bool OrNull);
 
- /* TO_UPSTREAM(BoundsSafety) ON*/
+  /* TO_UPSTREAM(BoundsSafety) ON*/
   /// Perform Bounds Safety Semantic checks for assigning to a `__counted_by` or
   /// `__counted_by_or_null` pointer type \param LHSTy.
   ///
@@ -2228,7 +2228,7 @@ public:
   ///
   /// \returns True iff no diagnostic where emitted, false otherwise.
   bool BoundsSafetyCheckAssignmentToCountAttrPtr(
-      QualType LHSTy, Expr *RHSExpr, Sema::AssignmentAction Action,
+      QualType LHSTy, Expr *RHSExpr, AssignmentAction Action,
       SourceLocation Loc,
       std::function<std::string()> ComputeAssignee = nullptr);
 
@@ -2248,7 +2248,7 @@ public:
   ///
   /// \returns True iff no diagnostic where emitted, false otherwise.
   bool BoundsSafetyCheckAssignmentToCountAttrPtrWithIncompletePointeeTy(
-      QualType LHSTy, Expr *RHSExpr, Sema::AssignmentAction Action,
+      QualType LHSTy, Expr *RHSExpr, AssignmentAction Action,
       SourceLocation Loc, std::function<std::string()> ComputeAssignee);
 
   /// Perform Bounds Safety Semantic checks for initializing a Bounds Safety
@@ -2264,7 +2264,7 @@ public:
   /// \returns True iff no diagnostic where emitted, false otherwise.
   bool BoundsSafetyCheckInitialization(const InitializedEntity &Entity,
                                        const InitializationKind &Kind,
-                                       Sema::AssignmentAction Action,
+                                       AssignmentAction Action,
                                        QualType LHSType, Expr *RHSExpr);
 
   /// Perform Bounds Safety semantic checks on function parameters on a function

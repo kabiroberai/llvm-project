@@ -393,7 +393,7 @@ UnsafeOperationVisitor::IsWidePointerWithBoundsOfSingle(const Expr *E) const {
   //
   //   AttributedType 0x120024c90 'uint8_t *__bidi_indexable' sugar
   //  `-PointerType 0x120024c60 'uint8_t *__bidi_indexable'
-  const auto *IndexablePtrType = E->getType()->getAs<PointerType>();
+  const auto *IndexablePtrType = E->getType()->getAs<clang::PointerType>();
   assert(IndexablePtrType);
 
   const auto TypeUsedForIndexing = IndexablePtrType->getPointeeType();
@@ -407,7 +407,7 @@ UnsafeOperationVisitor::IsWidePointerWithBoundsOfSingle(const Expr *E) const {
   }
 
   // Walk through AttributedType sugar
-  const auto *SinglePointerTy = SinglePtrQualTy->getAs<PointerType>();
+  const auto *SinglePointerTy = SinglePtrQualTy->getAs<clang::PointerType>();
   assert(SinglePointerTy);
 
   const auto SinglePointeeType = SinglePointerTy->getPointeeType();
@@ -936,7 +936,7 @@ void UnsafeOperationVisitor::
         llvm::SmallVectorImpl<BoundsSafetySuggestionHandler::SingleEntity>
             &SingleEntities) {
   const Expr *E = cast<Expr>(UnsafeOp);
-  const auto PointeeTy = E->getType()->getAs<PointerType>()->getPointeeType();
+  const auto PointeeTy = E->getType()->getAs<clang::PointerType>()->getPointeeType();
   if (PointeeTy->isIncompleteType())
     return;
   const auto PointeeTySizeInBits = Ctx.getTypeSizeOrNull(PointeeTy);
@@ -1043,7 +1043,7 @@ void UnsafeOperationVisitor::
 
   if (auto *UO = dyn_cast<UnaryOperator>(UnsafeOp)) {
     assert(UO->getOpcode() == UO_Deref);
-    const auto *BasePtrTy = UO->getSubExpr()->getType()->getAs<PointerType>();
+    const auto *BasePtrTy = UO->getSubExpr()->getType()->getAs<clang::PointerType>();
     assert(BasePtrTy);
     const auto BasePointeeTy = BasePtrTy->getPointeeType();
 
@@ -1077,7 +1077,7 @@ void UnsafeOperationVisitor::
         llvm::SmallVectorImpl<BoundsSafetySuggestionHandler::SingleEntity>
             &SingleEntities) {
   const auto *ME = cast<MemberExpr>(UnsafeOp);
-  const auto *BasePtrTy = ME->getBase()->getType()->getAs<PointerType>();
+  const auto *BasePtrTy = ME->getBase()->getType()->getAs<clang::PointerType>();
   assert(BasePtrTy);
   const auto BasePointeeTy = BasePtrTy->getPointeeType();
 
@@ -1138,7 +1138,7 @@ void UnsafeOperationVisitor::
             &SingleEntities,
         UnsafeOpKind Kind) {
   const auto IndexableEltTy =
-      IndexableVar->getType()->getAs<PointerType>()->getPointeeType();
+      IndexableVar->getType()->getAs<clang::PointerType>()->getPointeeType();
 
   // Note: We deliberately don't check the pointer attributes on `Operand`
   // as `IndexableVar` could have been casted to have a different pointer
@@ -1206,7 +1206,7 @@ void UnsafeOperationVisitor::
   const auto OperandTy = Operand->getType();
   if (!OperandTy->isPointerTypeWithBounds())
     return;
-  const auto EltTy = OperandTy->getAs<PointerType>()->getPointeeType();
+  const auto EltTy = OperandTy->getAs<clang::PointerType>()->getPointeeType();
 
   if (!AccessingElementZeroIsOOB(Ctx, EltTy, SingleEntities))
     return;
@@ -1221,7 +1221,7 @@ void UnsafeOperationVisitor::
   // Try to suppress warnings about unsafe bit casts in the expr tree of the
   // operand given that we've already warned about this trapping cast.
   const auto IndexableVarPointeeTy =
-      IndexableVar->getType()->getAs<PointerType>()->getPointeeType();
+      IndexableVar->getType()->getAs<clang::PointerType>()->getPointeeType();
   if (EltTy != IndexableVarPointeeTy) {
     const Expr *Current = Operand;
     const Expr *Previous = nullptr;
@@ -1298,7 +1298,7 @@ bool UnsafeOperationVisitor::
     return false;
 
   // Get size of pointee of CastExpr
-  auto CEPointeeTy = CE->getType()->getAs<PointerType>()->getPointeeType();
+  auto CEPointeeTy = CE->getType()->getAs<clang::PointerType>()->getPointeeType();
   const auto CEPointeeTySizeInBits = Ctx.getTypeSize(CEPointeeTy);
   if (CEPointeeTySizeInBits == 0)
     return false;

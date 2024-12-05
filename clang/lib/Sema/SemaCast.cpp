@@ -269,7 +269,7 @@ namespace {
               diag::
                   err_bounds_safety_incompatible_terminated_by_to_non_terminated_by) {
             auto FDiag = Self.Diag(OpRange.getBegin(), DiagKind)
-                         << SrcType << DestType << Sema::AA_Casting
+                         << SrcType << DestType << AssignmentAction::Casting
                          << (IsSrcNullTerm ? /*null_terminated*/ 1
                                            : /*terminated_by*/ 0);
           } else if (
@@ -280,12 +280,12 @@ namespace {
                   diag::
                       warn_bounds_safety_incompatible_non_terminated_by_to_terminated_by) {
             auto FDiag = Self.Diag(OpRange.getBegin(), DiagKind)
-                         << SrcType << DestType << Sema::AA_Casting
+                         << SrcType << DestType << AssignmentAction::Casting
                          << (IsDstNullTerm ? /*null_terminated*/ 1
                                            : /*terminated_by*/ 0);
           } else {
             Self.Diag(OpRange.getBegin(), DiagKind)
-                << SrcType << DestType << Sema::AA_Casting;
+                << SrcType << DestType << AssignmentAction::Casting;
           }
 
           Self.TryFixAssigningNullTerminatedToBidiIndexableExpr(SrcExpr.get(),
@@ -311,7 +311,7 @@ namespace {
                 SrcType, BoundsSafetyPointerAttributes::unsafeIndexable());
           }
           Self.Diag(OpRange.getBegin(), diag::err_bounds_safety_unsafe_to_safe)
-              << SrcType << DestType << Sema::AA_Casting;
+              << SrcType << DestType << AssignmentAction::Casting;
           SrcExpr = ExprError();
           return;
         }
@@ -321,7 +321,7 @@ namespace {
           if (SrcPTy->getPointeeType()->isIncompleteOrSizelessType()) {
             Self.Diag(OpRange.getBegin(),
                       diag::err_bounds_safety_incomplete_single_to_indexable)
-                << SrcType << DestType << Sema::AA_Casting;
+                << SrcType << DestType << AssignmentAction::Casting;
           } else {
             Self.DiagnoseSingleToWideLosingBounds(DestType, SrcType, SrcExpr.get());
           }
@@ -414,8 +414,10 @@ Sema::deduceCastPointerAttributes(QualType ResultType, QualType SrcType) {
   //  int *val2 = (int*)val;
   // If the source is not a pointer, the cast type inherits the default ABI
   // visible pointer attribute.
-  std::function<QualType(QualType, QualType, QualType)> applyAttrToDestTy =
-      [&](QualType DstTy, QualType SrcTy, QualType MergePointeeTy) -> QualType {
+  std::function<QualType(QualType, QualType, QualType, QualType)>
+      applyAttrToDestTy = [&](QualType DstTy, QualType SrcTy,
+                              QualType MergePointeeTy,
+                              QualType OrigDstTy) -> QualType {
     const auto *DPTy = DstTy->getAs<PointerType>();
     if (DPTy->isUnspecified() || MergePointeeTy != DstTy->getPointeeType()) {
       const auto *DVTT = DstTy->getAs<ValueTerminatedType>();

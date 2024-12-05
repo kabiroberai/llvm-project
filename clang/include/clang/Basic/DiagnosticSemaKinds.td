@@ -12691,24 +12691,24 @@ def err_bounds_safety_counted_by_on_incomplete_type_on_use : Error <
 
 def err_bounds_safety_counted_by_on_incomplete_type_on_assign : Error <
   "cannot %select{"
-    "assign to %select{object|'%1'}2 that has|" // AA_Assigning,
-    "pass argument to %select{parameter|parameter '%1'}2 that has|" // AA_Passing,
-    "return|" // AA_Returning,
-    "convert to|" // AA_Converting (UNUSED)
-    "%select{|implicitly }3initialize %select{object|'%1'}2 that has|" // AA_Initializing,
-    "pass argument to parameter that has|" // AA_Sending (UNUSED)
-    "cast to|" // AA_Casting (UNUSED)
-    "pass argument to parameter that has" // AA_Passing_CFAudited (UNUSED)
+    "assign to %select{object|'%1'}2 that has|" // AssignmentAction::Assigning,
+    "pass argument to %select{parameter|parameter '%1'}2 that has|" // AssignmentAction::Passing,
+    "return|" // AssignmentAction::Returning,
+    "convert to|" // AssignmentAction::Converting (UNUSED)
+    "%select{|implicitly }3initialize %select{object|'%1'}2 that has|" // AssignmentAction::Initializing,
+    "pass argument to parameter that has|" // AssignmentAction::Sending (UNUSED)
+    "cast to|" // AssignmentAction::Casting (UNUSED)
+    "pass argument to parameter that has" // AssignmentAction::Passing_CFAudited (UNUSED)
   "}0 type %4 because the pointee type %6 is incomplete and the '%5' attribute "
   "requires the pointee type be complete when %select{"
-    "assigning|" // AA_Assigning,
-    "passing|" // AA_Passing,
-    "returning|" // AA_Returning,
-    "converting|" // AA_Converting (UNUSED)
-    "initializing|" // AA_Initializing,
-    "passing|" // AA_Sending (UNUSED)
-    "casting|" // AA_Casting (UNUSED)
-    "passing" // AA_Passing_CFAudited (UNUSED)
+    "assigning|" // AssignmentAction::Assigning,
+    "passing|" // AssignmentAction::Passing,
+    "returning|" // AssignmentAction::Returning,
+    "converting|" // AssignmentAction::Converting (UNUSED)
+    "initializing|" // AssignmentAction::Initializing,
+    "passing|" // AssignmentAction::Sending (UNUSED)
+    "casting|" // AssignmentAction::Casting (UNUSED)
+    "passing" // AssignmentAction::Passing_CFAudited (UNUSED)
   "}0; "
   "consider providing a complete definition for %6 or using the "
   "'__sized_by%select{|_or_null}7' attribute"

@@ -8523,7 +8523,8 @@ ExprResult InitializationSequence::Perform(Sema &S,
         // might have occurred. For struct initialization it also allows
         // all field assignments to be checked rather than bailing on the
         // first error.
-        S.BoundsSafetyCheckInitialization(Entity, Kind, Sema::AA_Initializing,
+        S.BoundsSafetyCheckInitialization(Entity, Kind,
+                                          AssignmentAction::Initializing,
                                           /*LHSType=*/Step->Type,
                                           /*RHSExpr=*/CurInit.get());
         /* TO_UPSTREAM(BoundsSafety) OFF*/

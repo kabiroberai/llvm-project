@@ -3548,6 +3548,7 @@ void Parser::DistributeCLateParsedAttrs(Declarator &D, Decl *Dcl,
     for (const auto *LI : LPAI) {
       LateParsedAttribute *LA = new LateParsedAttribute(
           this, LI->AttrName, LI->AttrNameLoc, NestedLevel);
+      LA->MacroII = std::move(LI->MacroII);
       LA->Toks = std::move(LI->Toks);
       if (Dcl)
         LA->addDecl(Dcl);
@@ -5287,17 +5288,13 @@ void Parser::ParseLexedCAttribute(LateParsedAttribute &LA, bool EnterScope,
     /* TO_UPSTREAM(BoundsSafety) OFF */
   }
 
-  const auto &SM = PP.getSourceManager();
-  CharSourceRange ExpansionRange = SM.getExpansionRange(LA.AttrNameLoc);
-  StringRef FoundName =
-      Lexer::getSourceText(ExpansionRange, SM, PP.getLangOpts())
-          .split('(')
-          .first;
-  IdentifierInfo *MacroII = PP.getIdentifierInfo(FoundName);
-  for (unsigned i = 0; i < Attrs.size(); ++i)
-    Attrs[i].setMacroIdentifier(MacroII, ExpansionRange.getBegin(),
-                                SM.isInSystemMacro(LA.AttrNameLoc));
-
+  if (LA.MacroII) {
+    const auto &SM = PP.getSourceManager();
+    CharSourceRange ExpansionRange = SM.getExpansionRange(LA.AttrNameLoc);
+    for (unsigned i = 0; i < Attrs.size(); ++i)
+      Attrs[i].setMacroIdentifier(LA.MacroII, ExpansionRange.getBegin(),
+                                  SM.isInSystemMacro(LA.AttrNameLoc));
+  }
   for (auto *D : LA.Decls)
     Actions.ActOnFinishDelayedAttribute(getCurScope(), D, Attrs);
 
@@ -7105,7 +7102,7 @@ void Parser::ParseDeclaratorInternal(Declarator &D,
         } else {
           for (auto LA : LateAttrs) {
             auto LI = new DeclaratorChunk::LateParsedAttrInfo(
-                LA->Toks, LA->AttrName, LA->AttrNameLoc);
+                LA->Toks, LA->AttrName, LA->MacroII, LA->AttrNameLoc);
             LateAttrInfos.push_back(LI);
             delete LA;
           }
@@ -8629,7 +8626,7 @@ void Parser::ParseBracketDeclarator(Declarator &D) {
   SmallVector<clang::DeclaratorChunk::LateParsedAttrInfo *, 0> LateAttrInfos;
   for (auto LA : LateAttrs) {
     auto LI = new DeclaratorChunk::LateParsedAttrInfo(
-        LA->Toks, LA->AttrName, LA->AttrNameLoc);
+        LA->Toks, LA->AttrName, LA->MacroII, LA->AttrNameLoc);
     LateAttrInfos.push_back(LI);
     delete LA;
   }

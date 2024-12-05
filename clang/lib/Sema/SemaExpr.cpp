@@ -7705,7 +7705,7 @@ void TryFixSingleToDynamicCount(
 }
 
 bool checkDynamicCountSizeForAssignmentWithUnknownCount(
-    Sema &S, QualType LHSTy, const Expr *RHSExpr, Sema::AssignmentAction Action,
+    Sema &S, QualType LHSTy, const Expr *RHSExpr, AssignmentAction Action,
     SourceLocation Loc, const Twine &Designator, bool UnboundedRHS,
     const Expr *CountExpr,
     const llvm::SmallPtrSetImpl<const Expr *> &ReplacingValues) {
@@ -7738,7 +7738,7 @@ bool checkDynamicCountSizeForAssignmentWithUnknownCount(
 }
 
 bool checkDynamicCountSizeForAssignmentWithKnownCount(
-    Sema &S, QualType LHSTy, const Expr *RHSExpr, Sema::AssignmentAction Action,
+    Sema &S, QualType LHSTy, const Expr *RHSExpr, AssignmentAction Action,
     SourceLocation Loc, const Twine &Designator,
     const Sema::DependentValuesMap &DependentValues, bool UnboundedRHS,
     const Expr *CountExpr, const llvm::APSInt &CountVal,
@@ -7894,7 +7894,7 @@ bool checkDynamicCountSizeForAssignmentWithKnownCount(
 // inferred from the context, the map can be left empty, but the warnings will
 // be less precise.
 bool Sema::CheckDynamicCountSizeForAssignment(
-    QualType LHSTy, Expr *RHSExpr, Sema::AssignmentAction Action,
+    QualType LHSTy, Expr *RHSExpr, AssignmentAction Action,
     SourceLocation Loc, const Twine &Designator,
     DependentValuesMap &DependentValues, Expr *LHSMemberBase) {
   const auto *LDCPTy = LHSTy->getAs<CountAttributedType>();
@@ -8339,7 +8339,7 @@ static bool checkDynamicCountPointerAsParameter(Sema &S, FunctionDecl *FDecl,
 
     if (ParmInfo.isCountAttributedType() && !ParmInfo.isOutCountPointer() &&
         !S.CheckDynamicCountSizeForAssignment(
-            ParmInfo.getType(), ActualArgExp, Sema::AA_Passing,
+            ParmInfo.getType(), ActualArgExp, AssignmentAction::Passing,
             ActualArgExp->getBeginLoc(), ParmInfo.getDecl()->getName(),
             DependentValues) &&
         !S.allowBoundsUnsafeFunctionArg(Call, i)) {
@@ -16655,7 +16655,7 @@ QualType Sema::CheckAssignmentOperands(Expr *LHSExpr, ExprResult &RHS,
     // possible error recovery and to allow any subsequent diagnostics to
     // work.
     (void)BoundsSafetyCheckAssignmentToCountAttrPtr(
-        LHSType, RHS.get(), Sema::AA_Assigning, Loc,
+        LHSType, RHS.get(), AssignmentAction::Assigning, Loc,
         [&LHSExpr]() -> std::string {
           // In simple cases describe what is being assigned to
           if (auto *DR = dyn_cast<DeclRefExpr>(LHSExpr->IgnoreParenCasts())) {
@@ -16796,9 +16796,8 @@ QualType Sema::CheckAssignmentOperands(Expr *LHSExpr, ExprResult &RHS,
 
   /*TO_UPSTREAM(BoundsSafety) ON*/
   // Upstream doesn't have `Assignee`.
-  if (DiagnoseAssignmentResult(ConvTy, Loc, LHSType, RHSType,
-                               RHS.get(), AssignmentAction::Assigning,
-                               nullptr, Assignee))
+  if (DiagnoseAssignmentResult(ConvTy, Loc, LHSType, RHSType, RHS.get(),
+                               AssignmentAction::Assigning, nullptr, Assignee))
   /*TO_UPSTREAM(BoundsSafety) OFF*/
     return QualType();
 
@@ -19921,7 +19920,7 @@ ExprResult Sema::ActOnEmbedExpr(SourceLocation EmbedKeywordLoc,
 static ValueDecl *
 DiagnoseBoundsSafetyImplicitConversionFromSingleToExplicitIndexable(
     QualType DstType, QualType SrcType, Expr *SrcExpr,
-    Sema::AssignmentAction ActionForDiag, QualType FirstType,
+    AssignmentAction ActionForDiag, QualType FirstType,
     QualType SecondType, PartialDiagnostic &FDiag) {
   // We emit that a type is `__indexable` or
   // `__bidi_indexable` only when necesary.
@@ -20075,7 +20074,7 @@ void Sema::TryFixAssigningNullTerminatedToImplicitBidiIndexablePtr(
   // If the function return type is an implicit __bidi_indexable and the
   // returned pointer is __null_terminated, suggest adding the attribute
   // __null_terminated to the function return type.
-  if (Action == AA_Returning) {
+  if (Action == AssignmentAction::Returning) {
     auto *Caller = getCurFunctionDecl();
     if (!Caller)
       return;
@@ -21060,8 +21059,8 @@ bool Sema::DiagnoseAssignmentResult(AssignConvertType ConvTy,
     // a function parameter because the `diag::note_parameter_named_here`
     // is already emitted for it. An exception is made if there are FixIts
     // available that need to go on a note.
-    if (Action != AA_Passing ||
-        (Action == AA_Passing && AssignedVarFixIts.size() > 0 &&
+    if (Action != AssignmentAction::Passing ||
+        (Action == AssignmentAction::Passing && AssignedVarFixIts.size() > 0 &&
          !AssignedVarFixItGoesOnError)) {
       auto NoteDiag = Diag(AssignedVar->getBeginLoc(),
                            AssigneeName.size() > 0
