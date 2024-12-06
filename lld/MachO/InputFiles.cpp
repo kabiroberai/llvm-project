@@ -158,8 +158,10 @@ static bool checkCompatibility(const InputFile *input) {
     return true;
 
   // Swift LLVM fork downstream change start
+  #if defined(__APPLE__)
   error("This version of lld does not support linking for platform " + getPlatformName(platformInfos.front().target.Platform));
   return false;
+  #endif
   // Swift LLVM fork downstream change end
 
   auto it = find_if(platformInfos, [&](const PlatformInfo &info) {
